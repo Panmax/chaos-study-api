@@ -3,6 +3,7 @@ package courses
 import (
 	"github.com/Panmax/chaos-study-api/common"
 	"github.com/jinzhu/gorm"
+	"strconv"
 )
 
 type CourseModel struct {
@@ -30,4 +31,33 @@ func DeleteCourseModel(condition interface{}) error {
 	db := common.GetDB()
 	err := db.Where(condition).Delete(CourseModel{}).Error
 	return err
+}
+
+func (model *CourseModel) Update(data interface{}) error {
+	db := common.GetDB()
+	err := db.Model(model).Update(data).Error
+	return err
+}
+
+func FindCourse(limit, offset string) ([]CourseModel, int, error) {
+	offsetInt, err := strconv.Atoi(offset)
+	if err != nil {
+		offsetInt = 0
+		err = nil
+	}
+
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		limitInt = 20
+		err = nil
+	}
+
+	db := common.GetDB()
+	var models []CourseModel
+	var total int
+
+	db.Model(&models).Count(&total)
+	db.Offset(offsetInt).Limit(limitInt).Find(&models)
+
+	return models, total, err
 }

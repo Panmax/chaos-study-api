@@ -60,9 +60,22 @@ func CourseDelete(c *gin.Context) {
 }
 
 func CourseList(c *gin.Context) {
+	limit := c.Query("limit")
+	offset := c.Query("offset")
+
+	courseModels, total, err := FindCourse(limit, offset)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, common.NewError(err))
+		return
+	}
+
+	pageResponse := make(map[string]interface{})
+	pageResponse["total"] = total
+	pageResponse["results"] = courseModels
 	c.JSON(http.StatusOK, gin.H{
 		"code":    0,
 		"message": "OK",
-		"data":    []string{"1", "2", "3"},
+		"data":    pageResponse,
 	})
 }
