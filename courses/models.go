@@ -13,7 +13,7 @@ type CourseModel struct {
 
 	Name  string
 	Total uint16
-	Url   *string
+	Url   string
 	Pick  uint8
 }
 
@@ -30,12 +30,6 @@ func SaveOne(data interface{}) error {
 func DeleteCourseModel(condition interface{}) error {
 	db := common.GetDB()
 	err := db.Where(condition).Delete(CourseModel{}).Error
-	return err
-}
-
-func (model *CourseModel) Update(data interface{}) error {
-	db := common.GetDB()
-	err := db.Model(model).Update(data).Error
 	return err
 }
 
@@ -60,4 +54,11 @@ func FindCourse(limit, offset string) ([]CourseModel, int, error) {
 	db.Offset(offsetInt).Limit(limitInt).Find(&models)
 
 	return models, total, err
+}
+
+func FindOneCourse(id uint) (CourseModel, error) {
+	db := common.GetDB()
+	var course CourseModel
+	err := db.First(&course, id).Error
+	return course, err
 }

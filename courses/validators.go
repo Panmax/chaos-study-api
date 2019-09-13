@@ -18,6 +18,15 @@ func NewCourseModelValidator() CourseModelValidator {
 	return CourseModelValidator{}
 }
 
+func NewCourseModelValidatorFillWith(courseModel CourseModel) CourseModelValidator {
+	courseModelValidator := NewCourseModelValidator()
+	courseModelValidator.Name = courseModel.Name
+	courseModelValidator.Total = courseModel.Total
+	courseModelValidator.Url = courseModel.Url
+	courseModelValidator.Pick = courseModel.Pick
+	return courseModelValidator
+}
+
 func (v *CourseModelValidator) Bind(c *gin.Context) error {
 	err := common.Bind(c, v)
 	if err != nil {
@@ -27,9 +36,7 @@ func (v *CourseModelValidator) Bind(c *gin.Context) error {
 	v.courseModel.Name = v.Name
 	v.courseModel.Total = v.Total
 	v.courseModel.Pick = v.Pick
-	if v.Url != "" {
-		v.courseModel.Url = &v.Url
-	}
+	v.courseModel.Url = v.Url
 
 	v.courseModel.UserId = 1 // FIXME
 	return nil
