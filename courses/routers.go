@@ -84,7 +84,7 @@ func ListCourse(c *gin.Context) {
 		return
 	}
 
-	var results []CourseResponse
+	results := make([]CourseResponse, 0)
 	for _, courseModel := range courseModels {
 		serializer := CourseSerializer{courseModel}
 		results = append(results, serializer.Response())
