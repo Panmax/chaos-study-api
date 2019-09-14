@@ -22,7 +22,7 @@ func main() {
 	r := gin.Default()
 
 	v1 := r.Group("/api")
-	courses.CoursesRegister(v1.Group("/courses"))
+	courses.CoursesRegister(v1)
 
 	testAuth := r.Group("/api/ping")
 

@@ -47,13 +47,22 @@ func FindCourse(limit, offset string) ([]CourseModel, uint32, error) {
 	}
 
 	db := common.GetDB()
-	var models []CourseModel
+	var courses []CourseModel
 	var total uint32
 
-	db.Model(&models).Count(&total)
-	db.Offset(offsetInt).Limit(limitInt).Find(&models)
+	db.Model(&courses).Count(&total)
+	err = db.Offset(offsetInt).Limit(limitInt).Find(&courses).Error
 
-	return models, total, err
+	return courses, total, err
+}
+
+func FindAllCourse() ([]CourseModel, error) {
+	var courses []CourseModel
+
+	db := common.GetDB()
+	err := db.Find(&courses).Error
+
+	return courses, err
 }
 
 func FindOneCourse(id uint) (CourseModel, error) {

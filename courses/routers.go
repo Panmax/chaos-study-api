@@ -2,19 +2,23 @@ package courses
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Panmax/chaos-study-api/common"
 	"github.com/gin-gonic/gin"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func CoursesRegister(router *gin.RouterGroup) {
-	router.POST("", CreateCourse)
-	router.PUT("/:id", UpdateCourse)
-	router.DELETE("/:id", DeleteCourse)
-	router.GET("", ListCourse)
-	router.GET("/:id", GetCourse)
+	router.POST("/course", CreateCourse)
+	router.PUT("/course/:id", UpdateCourse)
+	router.DELETE("/course/:id", DeleteCourse)
+	router.GET("/courses", ListCourse)
+	router.GET("/course/:id", GetCourse)
+	router.GET("/courses/pick", PickCourse)
 }
 
 func CreateCourse(c *gin.Context) {
@@ -78,7 +82,6 @@ func ListCourse(c *gin.Context) {
 	offset := c.Query("offset")
 
 	courseModels, total, err := FindCourse(limit, offset)
-
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
@@ -108,4 +111,19 @@ func GetCourse(c *gin.Context) {
 
 	serializer := CourseSerializer{courseModel}
 	c.JSON(http.StatusOK, common.NewSuccessResponse(serializer.Response()))
+}
+
+func PickCourse(c *gin.Context) {
+	courseModels, err := FindAllCourse()
+	if err != nil {
+		c.JSON(http.StatusNotFound, common.NewError(err))
+		return
+	}
+
+	rand.Seed(time.Now().Unix())
+	pickedCourse := courseModels[rand.Intn(len(courseModels))]
+	section := rand.Intn(int(pickedCourse.Total))
+
+	result := fmt.Sprintf("今日学习《%s》第 %d 节", pickedCourse.Name, section+1)
+	c.JSON(http.StatusOK, common.NewSuccessResponse(result))
 }
