@@ -33,7 +33,7 @@ func DeleteCourseModel(condition interface{}) error {
 	return err
 }
 
-func FindCourse(limit, offset string) ([]CourseModel, int, error) {
+func FindCourse(limit, offset string) ([]CourseModel, uint32, error) {
 	offsetInt, err := strconv.Atoi(offset)
 	if err != nil {
 		offsetInt = 0
@@ -48,7 +48,7 @@ func FindCourse(limit, offset string) ([]CourseModel, int, error) {
 
 	db := common.GetDB()
 	var models []CourseModel
-	var total int
+	var total uint32
 
 	db.Model(&models).Count(&total)
 	db.Offset(offsetInt).Limit(limitInt).Find(&models)

@@ -29,10 +29,7 @@ func CreateCourse(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "OK",
-	})
+	c.JSON(http.StatusOK, common.NewSuccessResponse(nil))
 }
 
 func UpdateCourse(c *gin.Context) {
@@ -58,10 +55,7 @@ func UpdateCourse(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "OK",
-	})
+	c.JSON(http.StatusOK, common.NewSuccessResponse(nil))
 }
 
 func DeleteCourse(c *gin.Context) {
@@ -76,10 +70,7 @@ func DeleteCourse(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "OK",
-	})
+	c.JSON(http.StatusOK, common.NewSuccessResponse(nil))
 }
 
 func ListCourse(c *gin.Context) {
@@ -93,14 +84,14 @@ func ListCourse(c *gin.Context) {
 		return
 	}
 
-	pageResponse := make(map[string]interface{})
-	pageResponse["total"] = total
-	pageResponse["results"] = courseModels
-	c.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "OK",
-		"data":    pageResponse,
-	})
+	var results []CourseResponse
+	for _, courseModel := range courseModels {
+		serializer := CourseSerializer{courseModel}
+		results = append(results, serializer.Response())
+	}
+	paginationResponse := common.Pagination{Total: total, Results: results}
+
+	c.JSON(http.StatusOK, common.NewSuccessResponse(paginationResponse))
 }
 
 func GetCourse(c *gin.Context) {
@@ -109,14 +100,12 @@ func GetCourse(c *gin.Context) {
 		c.JSON(http.StatusNotFound, common.NewError(errors.New("无效id")))
 		return
 	}
-	articleModel, err := FindOneCourse(uint(id))
+	courseModel, err := FindOneCourse(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "OK",
-		"data":    articleModel,
-	})
+
+	serializer := CourseSerializer{courseModel}
+	c.JSON(http.StatusOK, common.NewSuccessResponse(serializer.Response()))
 }
