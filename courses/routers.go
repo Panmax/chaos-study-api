@@ -34,7 +34,7 @@ func CreateCourse(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 	}
 
-	c.JSON(http.StatusOK, common.NewSuccessResponse(nil))
+	c.JSON(http.StatusOK, common.NewSuccessResponse(true))
 }
 
 func UpdateCourse(c *gin.Context) {
@@ -63,7 +63,7 @@ func UpdateCourse(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, common.NewSuccessResponse(nil))
+	c.JSON(http.StatusOK, common.NewSuccessResponse(true))
 }
 
 func DeleteCourse(c *gin.Context) {
@@ -78,7 +78,7 @@ func DeleteCourse(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, common.NewSuccessResponse(nil))
+	c.JSON(http.StatusOK, common.NewSuccessResponse(true))
 }
 
 func ListCourse(c *gin.Context) {

@@ -7,8 +7,8 @@ import (
 )
 
 func SettingsRegister(router *gin.RouterGroup) {
-	router.GET("/settings", GetSetting)
-	router.PUT("/settings", UpdateSetting)
+	router.GET("/setting", GetSetting)
+	router.PUT("/setting", UpdateSetting)
 }
 
 func GetSetting(c *gin.Context) {
@@ -45,5 +45,5 @@ func UpdateSetting(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 		return
 	}
-	c.JSON(http.StatusOK, common.NewSuccessResponse(nil))
+	c.JSON(http.StatusOK, common.NewSuccessResponse(true))
 }
