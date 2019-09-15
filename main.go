@@ -15,6 +15,32 @@ func Migrate(db *gorm.DB) {
 	db.AutoMigrate(&plans.PlanModel{})
 }
 
+func FillUpDB() {
+	db := common.GetDB()
+
+	var userA users.UserModel
+	if db.First(&userA); userA.ID != 0 { // 说明表非空
+		return
+	}
+
+	tx1 := db.Begin()
+	userA = users.UserModel{
+		Username: "Panmax",
+		Email:    "test@g.cn",
+		Bio:      "Love Go",
+		Image:    nil,
+	}
+	tx1.Save(&userA)
+
+	planA := plans.PlanModel{
+		UserId:    userA.ID,
+		Count:     1,
+		NotRepeat: true,
+	}
+	tx1.Save(&planA)
+	tx1.Commit()
+}
+
 func main() {
 	db := common.Init()
 	Migrate(db)
@@ -34,22 +60,7 @@ func main() {
 		})
 	})
 
-	tx1 := db.Begin()
-	userA := users.UserModel{
-		Username: "Panmax",
-		Email:    "test@g.cn",
-		Bio:      "Love Go",
-		Image:    nil,
-	}
-	tx1.Save(&userA)
-
-	planA := plans.PlanModel{
-		UserId:    userA.ID,
-		Count:     1,
-		NotRepeat: true,
-	}
-	tx1.Save(&planA)
-	tx1.Commit()
+	FillUpDB()
 
 	r.Run()
 }
