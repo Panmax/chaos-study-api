@@ -48,13 +48,16 @@ func UpdateCourse(c *gin.Context) {
 		return
 	}
 
-	courseModelValidator := NewCourseModelValidatorFillWith(courseModel)
+	courseModelValidator := NewCourseModelValidator()
 	if err := courseModelValidator.Bind(c); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
 		return
 	}
-	courseModelValidator.courseModel.ID = courseModel.ID
-	if err := SaveOne(&courseModelValidator.courseModel); err != nil {
+	courseModel.Name = courseModelValidator.Name
+	courseModel.Chapters = courseModelValidator.Chapters
+	courseModel.Url = courseModelValidator.Url
+	courseModel.Pick = courseModelValidator.Pick
+	if err := SaveOne(&courseModel); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
 		return
 	}
@@ -103,7 +106,7 @@ func GetCourse(c *gin.Context) {
 		c.JSON(http.StatusNotFound, common.NewError(errors.New("无效id")))
 		return
 	}
-	courseModel, err := FindOneCourse(uint(id))
+	courseModel, err := FindOneCourse(uint(id)) // FIXME user filter
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
@@ -114,7 +117,7 @@ func GetCourse(c *gin.Context) {
 }
 
 func PickCourse(c *gin.Context) {
-	courseModels, err := FindAllCourse()
+	courseModels, err := FindAllCourse() // FIXME user filter
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
@@ -122,7 +125,7 @@ func PickCourse(c *gin.Context) {
 
 	rand.Seed(time.Now().Unix())
 	pickedCourse := courseModels[rand.Intn(len(courseModels))]
-	section := rand.Intn(int(pickedCourse.Total))
+	section := rand.Intn(int(pickedCourse.Chapters))
 
 	result := fmt.Sprintf("今日学习《%s》第 %d 节", pickedCourse.Name, section+1)
 	c.JSON(http.StatusOK, common.NewSuccessResponse(result))

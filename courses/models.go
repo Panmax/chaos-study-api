@@ -11,10 +11,10 @@ type CourseModel struct {
 
 	UserId uint
 
-	Name  string
-	Total uint16
-	Url   string
-	Pick  uint8
+	Name     string
+	Chapters uint16
+	Url      string
+	Pick     uint8
 }
 
 func (CourseModel) TableName() string {

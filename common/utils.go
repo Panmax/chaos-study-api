@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/go-playground/validator.v8"
+	"reflect"
 )
 
 type CommonError struct {
@@ -28,6 +29,10 @@ func NewValidatorError(err error) CommonError {
 }
 
 func NewError(err error) CommonError {
+	if reflect.TypeOf(err) == reflect.TypeOf(validator.ValidationErrors{}) {
+		return NewValidatorError(err)
+	}
+
 	res := CommonError{Code: -1}
 	res.Message = err.Error()
 	return res
