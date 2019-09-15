@@ -6,6 +6,12 @@ import (
 	"strconv"
 )
 
+func SaveOne(data interface{}) error {
+	db := common.GetDB()
+	err := db.Save(data).Error
+	return err
+}
+
 type CourseModel struct {
 	gorm.Model
 
@@ -19,12 +25,6 @@ type CourseModel struct {
 
 func (CourseModel) TableName() string {
 	return "course"
-}
-
-func SaveOne(data interface{}) error {
-	db := common.GetDB()
-	err := db.Save(data).Error
-	return err
 }
 
 func DeleteCourseModel(condition interface{}) error {
@@ -73,4 +73,24 @@ func FindOneCourse(id uint) (CourseModel, error) {
 	var course CourseModel
 	err := db.First(&course, id).Error
 	return course, err
+}
+
+type CourseFlowModel struct {
+	gorm.Model
+
+	UserId uint
+
+	Results CoursePickResults `gorm:"type:json"`
+}
+
+func (CourseFlowModel) TableName() string {
+	return "course_flow"
+}
+
+func FindTodayCourseFlow(userId uint) (CourseFlowModel, error) {
+	var courseFlow CourseFlowModel
+
+	db := common.GetDB()
+	err := db.Where("user_id = ?", userId).Where("created_at > ?", common.GetToday()).First(&courseFlow).Error
+	return courseFlow, err
 }

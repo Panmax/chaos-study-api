@@ -122,6 +122,12 @@ func GetCourse(c *gin.Context) {
 func PickCourse(c *gin.Context) {
 	var userId uint = 1 // FIXME
 
+	courseFlow, err := FindTodayCourseFlow(userId)
+	if err == nil {
+		c.JSON(http.StatusOK, common.NewSuccessResponse(courseFlow.Results))
+		return
+	}
+
 	plan, err := plans.FindPlanByUser(userId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
@@ -164,6 +170,12 @@ func PickCourse(c *gin.Context) {
 
 		courseSerializer := CourseSerializer{pickedCourse}
 		results = append(results, CoursePickResponse{Course: courseSerializer.Response(), Chapters: chapters})
+	}
+
+	err = SaveOne(&CourseFlowModel{UserId: userId, Results: results})
+	if err != nil {
+		c.JSON(http.StatusNotFound, common.NewError(err))
+		return
 	}
 
 	c.JSON(http.StatusOK, common.NewSuccessResponse(results))

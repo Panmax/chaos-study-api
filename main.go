@@ -11,6 +11,7 @@ import (
 
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(&courses.CourseModel{})
+	db.AutoMigrate(&courses.CourseFlowModel{})
 	db.AutoMigrate(&users.UserModel{})
 	db.AutoMigrate(&plans.PlanModel{})
 }

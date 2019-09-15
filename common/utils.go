@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gopkg.in/go-playground/validator.v8"
 	"reflect"
+	"time"
 )
 
 type CommonError struct {
@@ -49,4 +50,9 @@ func InSliceInt(sl []int, v int) bool {
 		}
 	}
 	return false
+}
+
+func GetToday() time.Time {
+	now := time.Now()
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 }

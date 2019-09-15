@@ -1,5 +1,10 @@
 package courses
 
+import (
+	"database/sql/driver"
+	"encoding/json"
+)
+
 type CourseSerializer struct {
 	CourseModel
 }
@@ -30,4 +35,14 @@ func (s *CourseSerializer) Response() CourseResponse {
 type CoursePickResponse struct {
 	Course   CourseResponse `json:"course"`
 	Chapters []int          `json:"chapters"`
+}
+
+type CoursePickResults []CoursePickResponse
+
+func (c CoursePickResults) Value() (driver.Value, error) {
+	return json.Marshal(c)
+}
+
+func (c *CoursePickResults) Scan(input interface{}) error {
+	return json.Unmarshal(input.([]byte), c)
 }
