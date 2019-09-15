@@ -164,7 +164,7 @@ response
 
 ### GET 获取复习计划
 
-`/setting`
+`/plan`
 
 response
 
@@ -181,7 +181,7 @@ response
 
 ### PUT 设置复习计划
 
-`/setting`
+`/plan`
 
 request
 

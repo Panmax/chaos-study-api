@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/Panmax/chaos-study-api/common"
 	"github.com/Panmax/chaos-study-api/courses"
-	"github.com/Panmax/chaos-study-api/settings"
+	"github.com/Panmax/chaos-study-api/plans"
 	"github.com/Panmax/chaos-study-api/users"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -12,7 +12,7 @@ import (
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(&courses.CourseModel{})
 	db.AutoMigrate(&users.UserModel{})
-	db.AutoMigrate(&settings.SettingModel{})
+	db.AutoMigrate(&plans.PlanModel{})
 }
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 
 	v1 := r.Group("/api")
 	courses.CoursesRegister(v1)
-	settings.SettingsRegister(v1)
+	plans.SettingsRegister(v1)
 
 	testAuth := r.Group("/api/ping")
 
@@ -43,12 +43,12 @@ func main() {
 	}
 	tx1.Save(&userA)
 
-	settingA := settings.SettingModel{
+	planA := plans.PlanModel{
 		UserId:    userA.ID,
 		Count:     1,
 		NotRepeat: true,
 	}
-	tx1.Save(&settingA)
+	tx1.Save(&planA)
 	tx1.Commit()
 
 	r.Run()

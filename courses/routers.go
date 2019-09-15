@@ -3,7 +3,7 @@ package courses
 import (
 	"errors"
 	"github.com/Panmax/chaos-study-api/common"
-	"github.com/Panmax/chaos-study-api/settings"
+	"github.com/Panmax/chaos-study-api/plans"
 	"github.com/gin-gonic/gin"
 	"log"
 	"math/rand"
@@ -122,7 +122,7 @@ func GetCourse(c *gin.Context) {
 func PickCourse(c *gin.Context) {
 	var userId uint = 1 // FIXME
 
-	setting, err := settings.FindSetting(userId)
+	plan, err := plans.FindPlanByUser(userId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
@@ -134,7 +134,7 @@ func PickCourse(c *gin.Context) {
 		return
 	}
 
-	count := int(setting.Count)
+	count := int(plan.Count)
 	if count > len(courseModels) {
 		count = len(courseModels)
 	}

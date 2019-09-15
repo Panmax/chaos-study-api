@@ -1,4 +1,4 @@
-package settings
+package plans
 
 import (
 	"github.com/Panmax/chaos-study-api/common"
@@ -7,41 +7,41 @@ import (
 )
 
 func SettingsRegister(router *gin.RouterGroup) {
-	router.GET("/setting", GetSetting)
-	router.PUT("/setting", UpdateSetting)
+	router.GET("/plan", GetPlan)
+	router.PUT("/plan", UpdatePlan)
 }
 
-func GetSetting(c *gin.Context) {
+func GetPlan(c *gin.Context) {
 	var userId uint = 1
-	setting, err := FindSetting(userId)
+	plan, err := FindPlanByUser(userId)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 		return
 	}
 
-	serializer := SettingSerializer{setting}
+	serializer := PlanSerializer{plan}
 	c.JSON(http.StatusOK, common.NewSuccessResponse(serializer.Response()))
 }
 
-func UpdateSetting(c *gin.Context) {
+func UpdatePlan(c *gin.Context) {
 	var userId uint = 1
 
-	setting, err := FindSetting(userId)
+	plan, err := FindPlanByUser(userId)
 	if err != nil {
-		setting = SettingModel{}
-		setting.UserId = userId
+		plan = PlanModel{}
+		plan.UserId = userId
 	}
 
-	settingModelValidator := NewSettingModelValidator()
-	err = settingModelValidator.Bind(c)
+	planModelValidator := NewPlanModelValidator()
+	err = planModelValidator.Bind(c)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 		return
 	}
 
-	setting.Count = settingModelValidator.settingModel.Count
-	setting.NotRepeat = settingModelValidator.settingModel.NotRepeat
-	if err = SaveOne(&setting); err != nil {
+	plan.Count = planModelValidator.planModel.Count
+	plan.NotRepeat = planModelValidator.planModel.NotRepeat
+	if err = SaveOne(&plan); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 		return
 	}

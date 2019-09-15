@@ -1,11 +1,11 @@
-package settings
+package plans
 
 import (
 	"github.com/Panmax/chaos-study-api/common"
 	"github.com/jinzhu/gorm"
 )
 
-type SettingModel struct {
+type PlanModel struct {
 	gorm.Model
 
 	UserId uint `gorm:"unique_index"`
@@ -14,8 +14,8 @@ type SettingModel struct {
 	NotRepeat bool
 }
 
-func (SettingModel) TableName() string {
-	return "setting"
+func (PlanModel) TableName() string {
+	return "plan"
 }
 
 func SaveOne(data interface{}) error {
@@ -24,10 +24,10 @@ func SaveOne(data interface{}) error {
 	return err
 }
 
-func FindSetting(userId uint) (SettingModel, error) {
+func FindPlanByUser(userId uint) (PlanModel, error) {
 	db := common.GetDB()
-	var setting SettingModel
+	var plan PlanModel
 
-	err := db.Where("user_id = ?", userId).First(&setting).Error
-	return setting, err
+	err := db.Where("user_id = ?", userId).First(&plan).Error
+	return plan, err
 }
