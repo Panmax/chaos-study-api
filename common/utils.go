@@ -41,3 +41,12 @@ func NewError(err error) CommonError {
 func Bind(c *gin.Context, obj interface{}) error {
 	return c.ShouldBind(obj)
 }
+
+func InSliceInt(sl []int, v int) bool {
+	for _, vv := range sl {
+		if vv == v {
+			return true
+		}
+	}
+	return false
+}

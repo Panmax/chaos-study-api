@@ -24,7 +24,7 @@ func SaveOne(data interface{}) error {
 	return err
 }
 
-func FindSettingByUserId(userId uint) (SettingModel, error) {
+func FindSetting(userId uint) (SettingModel, error) {
 	db := common.GetDB()
 	var setting SettingModel
 

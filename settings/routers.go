@@ -13,7 +13,7 @@ func SettingsRegister(router *gin.RouterGroup) {
 
 func GetSetting(c *gin.Context) {
 	var userId uint = 1
-	setting, err := FindSettingByUserId(userId)
+	setting, err := FindSetting(userId)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 		return
@@ -26,7 +26,7 @@ func GetSetting(c *gin.Context) {
 func UpdateSetting(c *gin.Context) {
 	var userId uint = 1
 
-	setting, err := FindSettingByUserId(userId)
+	setting, err := FindSetting(userId)
 	if err != nil {
 		setting = SettingModel{}
 		setting.UserId = userId

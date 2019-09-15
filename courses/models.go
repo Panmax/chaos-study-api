@@ -11,10 +11,10 @@ type CourseModel struct {
 
 	UserId uint
 
-	Name     string
-	Chapters uint16
-	Url      string
-	Pick     uint8
+	Name         string
+	TotalChapter uint16
+	Url          string
+	Pick         uint8
 }
 
 func (CourseModel) TableName() string {
@@ -33,7 +33,7 @@ func DeleteCourseModel(condition interface{}) error {
 	return err
 }
 
-func FindCourse(limit, offset string) ([]CourseModel, uint32, error) {
+func FindCourse(userId uint, limit, offset string) ([]CourseModel, uint32, error) {
 	offsetInt, err := strconv.Atoi(offset)
 	if err != nil {
 		offsetInt = 0
@@ -47,6 +47,8 @@ func FindCourse(limit, offset string) ([]CourseModel, uint32, error) {
 	}
 
 	db := common.GetDB()
+	db = db.Where("user_id = ?", userId)
+
 	var courses []CourseModel
 	var total uint32
 
@@ -56,11 +58,12 @@ func FindCourse(limit, offset string) ([]CourseModel, uint32, error) {
 	return courses, total, err
 }
 
-func FindAllCourse() ([]CourseModel, error) {
+func FindAllCourse(userId uint) ([]CourseModel, error) {
 	var courses []CourseModel
 
 	db := common.GetDB()
-	err := db.Find(&courses).Error
+
+	err := db.Where("user_id = ?", userId).Find(&courses).Error
 
 	return courses, err
 }

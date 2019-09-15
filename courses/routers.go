@@ -2,12 +2,13 @@ package courses
 
 import (
 	"errors"
-	"fmt"
 	"github.com/Panmax/chaos-study-api/common"
+	"github.com/Panmax/chaos-study-api/settings"
 	"github.com/gin-gonic/gin"
 	"log"
 	"math/rand"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -54,7 +55,7 @@ func UpdateCourse(c *gin.Context) {
 		return
 	}
 	courseModel.Name = courseModelValidator.Name
-	courseModel.Chapters = courseModelValidator.Chapters
+	courseModel.TotalChapter = courseModelValidator.TotalChapter
 	courseModel.Url = courseModelValidator.Url
 	courseModel.Pick = courseModelValidator.Pick
 	if err := SaveOne(&courseModel); err != nil {
@@ -81,10 +82,12 @@ func DeleteCourse(c *gin.Context) {
 }
 
 func ListCourse(c *gin.Context) {
+	var userId uint = 1 // FIXME
+
 	limit := c.Query("limit")
 	offset := c.Query("offset")
 
-	courseModels, total, err := FindCourse(limit, offset)
+	courseModels, total, err := FindCourse(userId, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
@@ -117,16 +120,51 @@ func GetCourse(c *gin.Context) {
 }
 
 func PickCourse(c *gin.Context) {
-	courseModels, err := FindAllCourse() // FIXME user filter
+	var userId uint = 1 // FIXME
+
+	setting, err := settings.FindSetting(userId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
 	}
 
-	rand.Seed(time.Now().Unix())
-	pickedCourse := courseModels[rand.Intn(len(courseModels))]
-	section := rand.Intn(int(pickedCourse.Chapters))
+	courseModels, err := FindAllCourse(userId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, common.NewError(err))
+		return
+	}
 
-	result := fmt.Sprintf("今日学习《%s》第 %d 节", pickedCourse.Name, section+1)
-	c.JSON(http.StatusOK, common.NewSuccessResponse(result))
+	count := int(setting.Count)
+	if count > len(courseModels) {
+		count = len(courseModels)
+	}
+
+	rand.Seed(time.Now().Unix())
+	var pickedCourses []CourseModel
+	var index int
+	for i := 0; i < int(count); i++ {
+		index = rand.Intn(len(courseModels))
+		pickedCourses = append(pickedCourses, courseModels[index])
+		courseModels = append(courseModels[:index], courseModels[index+1:]...) // 将挑选出的课程从列表中移除
+	}
+
+	var results []CoursePickResponse
+	for _, pickedCourse := range pickedCourses {
+		var chapters []int
+		for {
+			chapter := rand.Intn(int(pickedCourse.TotalChapter)) + 1 // 从第一节开始
+			if !common.InSliceInt(chapters, chapter) {
+				chapters = append(chapters, chapter)
+			}
+			if len(chapters) >= int(pickedCourse.Pick) || len(chapters) >= int(pickedCourse.TotalChapter) {
+				break
+			}
+		}
+		sort.Ints(chapters)
+
+		courseSerializer := CourseSerializer{pickedCourse}
+		results = append(results, CoursePickResponse{Course: courseSerializer.Response(), Chapters: chapters})
+	}
+
+	c.JSON(http.StatusOK, common.NewSuccessResponse(results))
 }

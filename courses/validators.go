@@ -7,10 +7,10 @@ import (
 )
 
 type CourseModelValidator struct {
-	Name     string `form:"name" json:"name" binding:"required"`
-	Chapters uint16 `form:"chapters" json:"chapters" binding:"required"`
-	Url      string `form:"url" json:"url" binding:"max=2048"`
-	Pick     uint8  `form:"pick" json:"pick"`
+	Name         string `form:"name" json:"name" binding:"required"`
+	TotalChapter uint16 `form:"total_chapter" json:"total_chapter" binding:"required"`
+	Url          string `form:"url" json:"url" binding:"max=2048"`
+	Pick         uint8  `form:"pick" json:"pick"`
 
 	courseModel CourseModel `json:"-"`
 }
@@ -26,7 +26,7 @@ func (v *CourseModelValidator) Bind(c *gin.Context) error {
 	}
 
 	v.courseModel.Name = strings.TrimSpace(v.Name)
-	v.courseModel.Chapters = v.Chapters
+	v.courseModel.TotalChapter = v.TotalChapter
 	v.courseModel.Pick = v.Pick
 	v.courseModel.Url = strings.TrimSpace(v.Url)
 
