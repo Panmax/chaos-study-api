@@ -42,6 +42,13 @@ func main() {
 		Image:    nil,
 	}
 	tx1.Save(&userA)
+
+	settingA := settings.SettingModel{
+		UserId:    userA.ID,
+		Count:     1,
+		NotRepeat: true,
+	}
+	tx1.Save(&settingA)
 	tx1.Commit()
 
 	r.Run()
