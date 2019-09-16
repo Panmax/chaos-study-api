@@ -21,10 +21,10 @@ request
 
 ```json
 {
-	"name": "The Linux Command Line",
-	"total_chapter": 37,
-	"url": "http://billie66.github.io/TLCL/book/index.html",
-	"pick": 1
+	"name": "The Linux Command Line", // 课程名
+	"total_chapter": 37, // 共计多少章节
+	"url": "http://billie66.github.io/TLCL/book/index.html", // 在线地址（可选）
+	"pick": 1  // 每日要复习的章节数
 }
 ```
 
@@ -187,8 +187,8 @@ request
 
 ```json
 {
-	"count" :2,
-	"not_repeat": true
+	"count" :2, // 每日复习课程数
+	"not_repeat": true // 不允许重复
 }
 ```
 
