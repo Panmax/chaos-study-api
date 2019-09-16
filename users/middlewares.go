@@ -8,8 +8,8 @@ import (
 )
 
 type login struct {
-	Username string `form:"username" json:"username" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
+	Username string `form:"username" json:"username" binding:"exists,alphanum,min=4,max=255"`
+	Password string `form:"password" json:"password" binding:"exists,min=6,max=255"`
 }
 
 func NewGinJWTMiddleware() (*jwt.GinJWTMiddleware, error) {

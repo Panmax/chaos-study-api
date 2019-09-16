@@ -40,6 +40,28 @@ func RegistrationUsers(c *gin.Context) {
 	c.JSON(http.StatusCreated, common.NewSuccessResponse(true))
 }
 
+type passwordForm struct {
+	Password string `form:"password" json:"password" binding:"exists,min=6,max=255"`
+}
+
 func UpdateUserPassword(c *gin.Context) {
-	c.String(http.StatusOK, "update password")
+	var form passwordForm
+
+	if err := c.ShouldBind(&form); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
+		return
+	}
+
+	user := c.MustGet(common.JWTIdentityKey).(*UserModel)
+	if err := user.setPassword(form.Password); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
+		return
+	}
+
+	if err := SaveOne(&user); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, common.NewSuccessResponse(true))
 }
