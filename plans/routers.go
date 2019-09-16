@@ -6,13 +6,14 @@ import (
 	"net/http"
 )
 
-func SettingsRegister(router *gin.RouterGroup) {
+func PlansRegister(router *gin.RouterGroup) {
 	router.GET("/plan", GetPlan)
 	router.PUT("/plan", UpdatePlan)
 }
 
 func GetPlan(c *gin.Context) {
-	var userId uint = 1
+	userId := c.MustGet(common.UserIDKey).(uint)
+
 	plan, err := FindPlanByUser(userId)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
@@ -24,7 +25,7 @@ func GetPlan(c *gin.Context) {
 }
 
 func UpdatePlan(c *gin.Context) {
-	var userId uint = 1
+	userId := c.MustGet(common.UserIDKey).(uint)
 
 	plan, err := FindPlanByUser(userId)
 	if err != nil {

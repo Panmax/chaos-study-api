@@ -94,3 +94,10 @@ func FindTodayCourseFlow(userId uint) (CourseFlowModel, error) {
 	err := db.Where("user_id = ?", userId).Where("created_at > ?", common.GetToday()).First(&courseFlow).Error
 	return courseFlow, err
 }
+
+func ExistCourseFlowByResult(userId uint, results CoursePickResults) (bool, error) {
+	var count int
+	db := common.GetDB()
+	err := db.Model(&CourseFlowModel{}).Where("user_id = ?", userId).Where("results = ?", results).Count(&count).Error
+	return count > 0, err
+}

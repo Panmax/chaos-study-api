@@ -24,6 +24,6 @@ func (v *PlanModelValidator) Bind(c *gin.Context) error {
 	v.planModel.Count = v.Count
 	v.planModel.NotRepeat = *v.NotRepeat
 
-	v.planModel.UserId = 1 // FIXME
+	v.planModel.UserId = c.MustGet(common.UserIDKey).(uint)
 	return nil
 }

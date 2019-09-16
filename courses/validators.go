@@ -30,6 +30,6 @@ func (v *CourseModelValidator) Bind(c *gin.Context) error {
 	v.courseModel.Pick = v.Pick
 	v.courseModel.Url = strings.TrimSpace(v.Url)
 
-	v.courseModel.UserId = 1 // FIXME
+	v.courseModel.UserId = c.MustGet(common.UserIDKey).(uint)
 	return nil
 }

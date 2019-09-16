@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+const MaxFindCount int = 20
+
 func CoursesRegister(router *gin.RouterGroup) {
 	router.POST("/course", CreateCourse)
 	router.PUT("/course/:id", UpdateCourse)
@@ -48,6 +50,9 @@ func UpdateCourse(c *gin.Context) {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
 	}
+	if courseModel.UserId != c.MustGet(common.UserIDKey).(uint) {
+		c.JSON(http.StatusForbidden, common.NewError(errors.New("无权限")))
+	}
 
 	courseModelValidator := NewCourseModelValidator()
 	if err := courseModelValidator.Bind(c); err != nil {
@@ -72,17 +77,21 @@ func DeleteCourse(c *gin.Context) {
 		c.JSON(http.StatusNotFound, common.NewError(errors.New("无效id")))
 		return
 	}
-	err = DeleteCourseModel([]uint{uint(id)})
+	courseModel, err := FindOneCourse(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
 	}
+	if courseModel.UserId != c.MustGet(common.UserIDKey).(uint) {
+		c.JSON(http.StatusForbidden, common.NewError(errors.New("无权限")))
+	}
 
+	DeleteCourseModel([]uint{uint(id)})
 	c.JSON(http.StatusOK, common.NewSuccessResponse(true))
 }
 
 func ListCourse(c *gin.Context) {
-	var userId uint = 1 // FIXME
+	userId := c.MustGet(common.UserIDKey).(uint)
 
 	limit := c.Query("limit")
 	offset := c.Query("offset")
@@ -109,7 +118,7 @@ func GetCourse(c *gin.Context) {
 		c.JSON(http.StatusNotFound, common.NewError(errors.New("无效id")))
 		return
 	}
-	courseModel, err := FindOneCourse(uint(id)) // FIXME user filter
+	courseModel, err := FindOneCourse(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
@@ -120,7 +129,7 @@ func GetCourse(c *gin.Context) {
 }
 
 func PickCourse(c *gin.Context) {
-	var userId uint = 1 // FIXME
+	userId := c.MustGet(common.UserIDKey).(uint)
 
 	courseFlow, err := FindTodayCourseFlow(userId)
 	if err == nil {
@@ -130,14 +139,44 @@ func PickCourse(c *gin.Context) {
 
 	plan, err := plans.FindPlanByUser(userId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, common.NewError(err))
+		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 		return
 	}
 
+	var results []CoursePickResponse
+	for i := 0; i < MaxFindCount; i++ {
+		results, err = pickCourse(userId, plan)
+		if err != nil {
+			c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
+			return
+		}
+		if !plan.NotRepeat {
+			break
+		} else {
+			if exist, err := ExistCourseFlowByResult(userId, results); err != nil {
+				c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
+				return
+			} else if !exist {
+				break
+			}
+			results = []CoursePickResponse{}
+		}
+	}
+
+	err = SaveOne(&CourseFlowModel{UserId: userId, Results: results})
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, common.NewSuccessResponse(results))
+}
+
+func pickCourse(userId uint, plan plans.PlanModel) ([]CoursePickResponse, error) {
+
 	courseModels, err := FindAllCourse(userId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, common.NewError(err))
-		return
+		return nil, err
 	}
 
 	count := int(plan.Count)
@@ -171,12 +210,5 @@ func PickCourse(c *gin.Context) {
 		courseSerializer := CourseSerializer{pickedCourse}
 		results = append(results, CoursePickResponse{Course: courseSerializer.Response(), Chapters: chapters})
 	}
-
-	err = SaveOne(&CourseFlowModel{UserId: userId, Results: results})
-	if err != nil {
-		c.JSON(http.StatusNotFound, common.NewError(err))
-		return
-	}
-
-	c.JSON(http.StatusOK, common.NewSuccessResponse(results))
+	return results, nil
 }
