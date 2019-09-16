@@ -13,6 +13,75 @@
 
 ### 统一前缀 /api
 
+
+### POST 创建用户
+
+`/user`
+
+request
+
+```json
+{
+	"username": "username",
+	"password": "password"
+}
+```
+
+response
+
+```json
+{
+    "code": 0,
+    "message": "success",
+    "data": true
+}
+```
+
+### 登录
+
+`/auth/login`
+
+request
+
+```json
+{
+	"username": "username",
+	"password": "password"
+}
+```
+
+response
+
+```json
+{
+    "code": 200,
+    "expire": "2019-09-17T06:12:12+08:00",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Njg2NzE5MzIsIm9yaWdfaWF0IjoxNTY4NjQzMTMyLCJ1c2VybmFtZSI6ImppYXBhbiJ9.ooM41jdWEkBb5y41KMh49g3FJ6PcVfBpVfMsVeYXrvY"
+}
+```
+
+### POST 修改密码
+
+`/user/password`
+
+request
+
+```json
+{
+	"password": "654321"
+}
+```
+
+response
+
+```json
+{
+    "code": 0,
+    "message": "success",
+    "data": true
+}
+```
+
 ### POST 创建课程
 
 `/course`
