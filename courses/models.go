@@ -29,11 +29,10 @@ func (CourseModel) TableName() string {
 
 func DeleteCourseModel(condition interface{}) error {
 	db := common.GetDB()
-	err := db.Where(condition).Delete(CourseModel{}).Error
-	return err
+	return db.Where(condition).Delete(CourseModel{}).Error
 }
 
-func FindCourse(userId uint, limit, offset string) ([]CourseModel, uint32, error) {
+func FindCourse(userId uint, limit, offset string) (courses []CourseModel, total uint32, err error) {
 	offsetInt, err := strconv.Atoi(offset)
 	if err != nil {
 		offsetInt = 0
@@ -49,30 +48,24 @@ func FindCourse(userId uint, limit, offset string) ([]CourseModel, uint32, error
 	db := common.GetDB()
 	db = db.Where("user_id = ?", userId)
 
-	var courses []CourseModel
-	var total uint32
-
 	db.Model(&courses).Count(&total)
 	err = db.Offset(offsetInt).Limit(limitInt).Find(&courses).Error
 
-	return courses, total, err
+	return
 }
 
-func FindAllCourse(userId uint) ([]CourseModel, error) {
-	var courses []CourseModel
-
+func FindAllCourse(userId uint) (courses []CourseModel, err error) {
 	db := common.GetDB()
+	err = db.Where("user_id = ?", userId).Find(&courses).Error
 
-	err := db.Where("user_id = ?", userId).Find(&courses).Error
-
-	return courses, err
+	return
 }
 
-func FindOneCourse(id uint) (CourseModel, error) {
+func FindOneCourse(id uint) (course CourseModel, err error) {
 	db := common.GetDB()
-	var course CourseModel
-	err := db.First(&course, id).Error
-	return course, err
+	err = db.First(&course, id).Error
+
+	return
 }
 
 type CourseFlowModel struct {
@@ -87,12 +80,12 @@ func (CourseFlowModel) TableName() string {
 	return "course_flow"
 }
 
-func FindTodayCourseFlow(userId uint) (CourseFlowModel, error) {
+func FindTodayCourseFlow(userId uint) (flow CourseFlowModel, err error) {
 	var courseFlow CourseFlowModel
 
 	db := common.GetDB()
-	err := db.Where("user_id = ?", userId).Where("created_at > ?", common.GetToday()).First(&courseFlow).Error
-	return courseFlow, err
+	err = db.Where("user_id = ?", userId).Where("created_at > ?", common.GetToday()).First(&courseFlow).Error
+	return
 }
 
 func ExistCourseFlowByResult(userId uint, results CoursePickResults) (bool, error) {
