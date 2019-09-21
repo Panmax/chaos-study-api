@@ -11,6 +11,8 @@
 
 ## API 文档
 
+> 测试地址：`http://chaos.jpanj.com/api/courses/pick`
+
 ### 统一前缀 /api
 
 
