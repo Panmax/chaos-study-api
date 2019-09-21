@@ -14,7 +14,7 @@ func Init() *gorm.DB {
 		os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), "MYSQL_PORT", "MYSQL_DB")
 	db, err := gorm.Open("mysql", connArgs)
 	if err != nil {
-		fmt.Println("db err: ", err)
+		panic("db err: " + err.Error())
 	}
 	db.DB().SetMaxIdleConns(10)
 	db.LogMode(true)
