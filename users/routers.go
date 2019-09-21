@@ -3,7 +3,6 @@ package users
 import (
 	"errors"
 	"github.com/Panmax/chaos-study-api/common"
-	"github.com/Panmax/chaos-study-api/plans"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -28,11 +27,7 @@ func RegistrationUsers(c *gin.Context) {
 		return
 	}
 
-	if err := SaveOne(&userModelValidator.userModel); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
-		return
-	}
-	if err = plans.SaveOne(&plans.PlanModel{UserId: userModelValidator.userModel.ID, Count: 1, NotRepeat: true}); err != nil {
+	if err := CreateUser(&userModelValidator.userModel); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 		return
 	}

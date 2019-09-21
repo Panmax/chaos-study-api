@@ -3,6 +3,7 @@ package users
 import (
 	"errors"
 	"github.com/Panmax/chaos-study-api/common"
+	"github.com/Panmax/chaos-study-api/plans"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,6 +23,24 @@ func SaveOne(data interface{}) error {
 	db := common.GetDB()
 	err := db.Save(data).Error
 	return err
+}
+
+func CreateUser(user *UserModel) error {
+	tx := common.GetDB().Begin()
+
+	if err := tx.Create(user).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Create(&plans.PlanModel{UserId: user.ID, Count: 1, NotRepeat: true}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+	return nil
+
 }
 
 func (u *UserModel) setPassword(password string) error {
