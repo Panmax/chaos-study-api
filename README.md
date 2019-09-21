@@ -11,7 +11,7 @@
 
 ## API 文档
 
-> 测试地址：`http://chaos.jpanj.com/api/courses/pick`
+> API 测试地址：`http://chaos.jpanj.com`
 
 ### 统一前缀 /api
 

@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"log"
+	"net/http"
 )
 
 func Migrate(db *gorm.DB) {
@@ -71,9 +72,13 @@ func main() {
 		user := c.MustGet(common.JWTIdentityKey).(*users.UserModel)
 		fmt.Println(user)
 
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "pong, " + user.Username,
 		})
+	})
+
+	r.GET("", func(c *gin.Context) {
+		c.String(http.StatusOK, "Chaos Study API")
 	})
 
 	FillUpDB()
