@@ -11,7 +11,7 @@ var DB *gorm.DB
 
 func Init() *gorm.DB {
 	connArgs := fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), "MYSQL_PORT", "MYSQL_DB")
+		os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DB"))
 	db, err := gorm.Open("mysql", connArgs)
 	if err != nil {
 		panic("db err: " + err.Error())
