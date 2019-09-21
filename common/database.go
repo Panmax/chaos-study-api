@@ -3,13 +3,16 @@ package common
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"os"
 )
 
 var DB *gorm.DB
 
 func Init() *gorm.DB {
-	db, err := gorm.Open("sqlite3", "./gorm.db")
+	connArgs := fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+		os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), "MYSQL_PORT", "MYSQL_DB")
+	db, err := gorm.Open("mysql", connArgs)
 	if err != nil {
 		fmt.Println("db err: ", err)
 	}

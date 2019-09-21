@@ -2,7 +2,6 @@ package courses
 
 import (
 	"github.com/Panmax/chaos-study-api/common"
-	"github.com/jinzhu/gorm"
 	"strconv"
 )
 
@@ -13,18 +12,30 @@ func SaveOne(data interface{}) error {
 }
 
 type CourseModel struct {
-	gorm.Model
+	common.Model
 
-	UserId uint
+	UserId uint `gorm:"not null"`
 
-	Name         string
-	TotalChapter uint16
-	Url          string
-	Pick         uint8
+	Name         string `gorm:"size:128;not null"`
+	TotalChapter uint16 `gorm:"not null"`
+	Url          string `gorm:"not null"`
+	Pick         uint8  `gorm:"not null"`
 }
 
 func (CourseModel) TableName() string {
 	return "course"
+}
+
+type CourseFlowModel struct {
+	common.Model
+
+	UserId uint `gorm:"not null"`
+
+	Results CoursePickResults `gorm:"type:json;not null"`
+}
+
+func (CourseFlowModel) TableName() string {
+	return "course_flow"
 }
 
 func DeleteCourseModel(condition interface{}) error {
@@ -68,23 +79,9 @@ func FindOneCourse(id uint) (course CourseModel, err error) {
 	return
 }
 
-type CourseFlowModel struct {
-	gorm.Model
-
-	UserId uint
-
-	Results CoursePickResults `gorm:"type:json"`
-}
-
-func (CourseFlowModel) TableName() string {
-	return "course_flow"
-}
-
 func FindTodayCourseFlow(userId uint) (flow CourseFlowModel, err error) {
-	var courseFlow CourseFlowModel
-
 	db := common.GetDB()
-	err = db.Where("user_id = ?", userId).Where("created_at > ?", common.GetToday()).First(&courseFlow).Error
+	err = db.Where("user_id = ?", userId).Where("created_at > ?", common.GetToday()).First(&flow).Error
 	return
 }
 

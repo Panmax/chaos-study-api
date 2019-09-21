@@ -3,14 +3,14 @@ package users
 import (
 	"errors"
 	"github.com/Panmax/chaos-study-api/common"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserModel struct {
-	gorm.Model
-	Username     string `gorm:"column:username;unique_index"`
-	Bio          string `gorm:"column:bio;size:1024"`
+	common.Model
+
+	Username     string `gorm:"size:64;unique_index;not null"`
+	Bio          string `gorm:"size:1024;not null"`
 	PasswordHash string `gorm:"column:password;not null"`
 }
 

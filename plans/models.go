@@ -2,16 +2,15 @@ package plans
 
 import (
 	"github.com/Panmax/chaos-study-api/common"
-	"github.com/jinzhu/gorm"
 )
 
 type PlanModel struct {
-	gorm.Model
+	common.Model
 
-	UserId uint `gorm:"unique_index"`
+	UserId uint `gorm:"unique_index;not null"`
 
-	Count     uint8
-	NotRepeat bool
+	Count     uint8 `gorm:"not null"`
+	NotRepeat bool  `gorm:"not null"`
 }
 
 func (PlanModel) TableName() string {
