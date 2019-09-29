@@ -93,22 +93,10 @@ func DeleteCourse(c *gin.Context) {
 func ListCourse(c *gin.Context) {
 	userId := c.MustGet(common.UserIDKey).(uint)
 
-	page := c.Query("page")
-	size := c.Query("size")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "0"))
+	size, _ := strconv.Atoi(c.DefaultQuery("size", "20"))
 
-	pageInt, err := strconv.Atoi(page)
-	if err != nil {
-		pageInt = 0
-		err = nil
-	}
-
-	sizeInt, err := strconv.Atoi(size)
-	if err != nil {
-		sizeInt = 20
-		err = nil
-	}
-
-	courseModels, total, err := FindCourse(userId, pageInt, sizeInt)
+	courseModels, total, err := FindCourse(userId, page, size)
 	if err != nil {
 		c.JSON(http.StatusNotFound, common.NewError(err))
 		return
