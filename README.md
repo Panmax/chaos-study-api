@@ -111,7 +111,7 @@ response
 
 ### GET 获取课程列表
 
-`/courses?limit=20&offset=0`
+`/courses?page=0&size=20`
 
 response
 

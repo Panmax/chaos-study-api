@@ -2,7 +2,6 @@ package courses
 
 import (
 	"github.com/Panmax/chaos-study-api/common"
-	"strconv"
 	"time"
 )
 
@@ -46,24 +45,13 @@ func DeleteCourseModel(condition interface{}) error {
 	return db.Where(condition).Delete(CourseModel{}).Error
 }
 
-func FindCourse(userId uint, limit, offset string) (courses []CourseModel, total uint32, err error) {
-	offsetInt, err := strconv.Atoi(offset)
-	if err != nil {
-		offsetInt = 0
-		err = nil
-	}
-
-	limitInt, err := strconv.Atoi(limit)
-	if err != nil {
-		limitInt = 20
-		err = nil
-	}
+func FindCourse(userId uint, page, size int) (courses []CourseModel, total uint32, err error) {
 
 	db := common.GetDB()
 	db = db.Where("user_id = ?", userId)
 
 	db.Model(&courses).Count(&total)
-	err = db.Offset(offsetInt).Limit(limitInt).Find(&courses).Error
+	err = db.Order("id desc").Offset(page * size).Limit(size).Find(&courses).Error
 
 	return
 }
