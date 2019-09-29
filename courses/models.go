@@ -3,6 +3,7 @@ package courses
 import (
 	"github.com/Panmax/chaos-study-api/common"
 	"strconv"
+	"time"
 )
 
 func SaveOne(data interface{}) error {
@@ -20,6 +21,7 @@ type CourseModel struct {
 	TotalChapter uint16 `gorm:"not null"`
 	Url          string `gorm:"not null"`
 	Pick         uint8  `gorm:"not null"`
+	DeletedAt    *time.Time
 }
 
 func (CourseModel) TableName() string {
@@ -31,7 +33,8 @@ type CourseFlowModel struct {
 
 	UserId uint `gorm:"not null"`
 
-	Results CoursePickResults `gorm:"type:json;not null"`
+	CourseId uint   `gorm:"not null"`
+	Chapter  uint16 `gorm:"not null"`
 }
 
 func (CourseFlowModel) TableName() string {
@@ -74,20 +77,27 @@ func FindAllCourse(userId uint) (courses []CourseModel, err error) {
 
 func FindOneCourse(id uint) (course CourseModel, err error) {
 	db := common.GetDB()
-	err = db.First(&course, id).Error
+	err = db.Unscoped().First(&course, id).Error
 
 	return
 }
 
-func FindTodayCourseFlow(userId uint) (flow CourseFlowModel, err error) {
-	db := common.GetDB()
-	err = db.Where("user_id = ?", userId).Where("created_at > ?", common.GetToday()).First(&flow).Error
+func FindCourseFlow(userId uint, args ...interface{}) (flows []CourseFlowModel, err error) {
+	db := common.GetDB().Where("user_id = ?", userId)
+	if len(args) >= 2 {
+		db = db.Where(args[0], args[1:]...)
+	} else if len(args) >= 1 {
+		db = db.Where(args[0])
+	}
+	err = db.Find(&flows).Error
+
 	return
 }
 
-func ExistCourseFlowByResult(userId uint, results CoursePickResults) (bool, error) {
+func ExistCourseFlowByCourseAndChapter(userId uint, courseId uint, chapter uint16) (bool, error) {
 	var count int
 	db := common.GetDB()
-	err := db.Model(&CourseFlowModel{}).Where("user_id = ?", userId).Where("results = ?", results).Count(&count).Error
+	err := db.Model(&CourseFlowModel{}).Where("user_id = ?", userId).Where(
+		"course_id = ?", courseId).Where("chapter = ?", chapter).Count(&count).Error
 	return count > 0, err
 }

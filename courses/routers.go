@@ -131,48 +131,27 @@ func GetCourse(c *gin.Context) {
 func PickCourse(c *gin.Context) {
 	userId := c.MustGet(common.UserIDKey).(uint)
 
-	courseFlow, err := FindTodayCourseFlow(userId)
-	if err == nil {
-		c.JSON(http.StatusOK, common.NewSuccessResponse(courseFlow.Results))
-		return
-	}
-
-	plan, err := plans.FindPlanByUser(userId)
+	flows, err := FindCourseFlow(userId, "created_at > ?", common.GetToday())
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 		return
-	}
-
-	var results []CoursePickResponse
-	for i := 0; i < MaxFindCount; i++ {
-		results, err = pickCourse(userId, plan)
+	} else if len(flows) == 0 {
+		plan, err := plans.FindPlanByUser(userId)
 		if err != nil {
 			c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
 			return
 		}
-		if !plan.NotRepeat {
-			break
-		} else {
-			if exist, err := ExistCourseFlowByResult(userId, results); err != nil {
-				c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
-				return
-			} else if !exist {
-				break
-			}
-			results = []CoursePickResponse{}
+
+		flows, _ = pickCourse(userId, plan)
+		for _, flow := range flows {
+			SaveOne(&flow)
 		}
 	}
 
-	err = SaveOne(&CourseFlowModel{UserId: userId, Results: results})
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
-		return
-	}
-
-	c.JSON(http.StatusOK, common.NewSuccessResponse(results))
+	c.JSON(http.StatusOK, makePickResponse(flows))
 }
 
-func pickCourse(userId uint, plan plans.PlanModel) ([]CoursePickResponse, error) {
+func pickCourse(userId uint, plan plans.PlanModel) ([]CourseFlowModel, error) {
 
 	courseModels, err := FindAllCourse(userId)
 	if err != nil {
@@ -193,22 +172,65 @@ func pickCourse(userId uint, plan plans.PlanModel) ([]CoursePickResponse, error)
 		courseModels = append(courseModels[:index], courseModels[index+1:]...) // 将挑选出的课程从列表中移除
 	}
 
-	var results []CoursePickResponse
+	var results []CourseFlowModel
 	for _, pickedCourse := range pickedCourses {
 		var chapters []int
+		maxTry := int(pickedCourse.Pick * 5)
+		tryCounter := 0
 		for {
-			chapter := rand.Intn(int(pickedCourse.TotalChapter)) + 1 // 从第一节开始
-			if !common.InSliceInt(chapters, chapter) {
-				chapters = append(chapters, chapter)
+			tryCounter++
+			if tryCounter > maxTry {
+				break
 			}
+
+			chapter := rand.Intn(int(pickedCourse.TotalChapter)) + 1 // 从第一节开始
+
+			if plan.NotRepeat {
+				if exist, err := ExistCourseFlowByCourseAndChapter(userId, pickedCourse.ID, uint16(chapter)); err != nil {
+					return nil, err
+				} else if exist {
+					continue
+				}
+			}
+
+			chapters = append(chapters, chapter)
 			if len(chapters) >= int(pickedCourse.Pick) || len(chapters) >= int(pickedCourse.TotalChapter) {
 				break
 			}
 		}
 		sort.Ints(chapters)
 
-		courseSerializer := CourseSerializer{pickedCourse}
-		results = append(results, CoursePickResponse{Course: courseSerializer.Response(), Chapters: chapters})
+		for _, chapter := range chapters {
+			results = append(results, CourseFlowModel{UserId: userId, CourseId: pickedCourse.ID, Chapter: uint16(chapter)})
+		}
+
 	}
+
 	return results, nil
+}
+
+func makePickResponse(flows []CourseFlowModel) []*CoursePickResponse {
+	var results []*CoursePickResponse
+	for _, flow := range flows {
+
+		find := false
+		for _, r := range results {
+			if r.Course.ID == flow.CourseId {
+				r.Chapters = append(r.Chapters, int(flow.Chapter))
+				find = true
+				break
+			}
+		}
+		if find {
+			continue
+		}
+
+		var response CoursePickResponse
+		course, _ := FindOneCourse(flow.CourseId)
+		courseSerializer := CourseSerializer{course}
+		response.Course = courseSerializer.Response()
+		response.Chapters = append(response.Chapters, int(flow.Chapter))
+		results = append(results, &response)
+	}
+	return results
 }
