@@ -86,7 +86,11 @@ func DeleteCourse(c *gin.Context) {
 		c.JSON(http.StatusForbidden, common.NewError(errors.New("无权限")))
 	}
 
-	DeleteCourseModel([]uint{uint(id)})
+	if err := DeleteCourseModel([]uint{uint(id)}); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewError(err))
+		return
+	}
+
 	c.JSON(http.StatusOK, common.NewSuccessResponse(true))
 }
 
